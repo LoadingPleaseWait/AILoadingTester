@@ -32,7 +32,7 @@ public class AILoadingTester {
 		
 		settingsProperties.setProperty("IS_GRAPHICAL", "false");
 		settingsProperties.setProperty("AI_PACKAGE_NAMES", "loadingpleasewait, bonnmath, bvb, clonewarriors, dichterunddenker, pwahs03, solitary");
-		settingsProperties.setProperty("NUMBER_OF_ROUNDS", "2");
+		settingsProperties.setProperty("NUMBER_OF_ROUNDS", "5");
 		settingsProperties.setProperty("HOME_AND_AWAY", "true");
 		settingsProperties.setProperty("TOURNAMENT", "true");
 		settingsProperties.setProperty("FRAMES_PER_SECOND", "0");
@@ -60,9 +60,9 @@ public class AILoadingTester {
 		parametersProperties.setProperty("MINIMUM_SUGAR_DISTANCE", "200");
 		parametersProperties.setProperty("MINIMUM_SUGAR_DISTANCE_TO_OTHER_SUGAR", "22");
 		parametersProperties.setProperty("SUGAR_SOURCES_PER_PLAYER", "3");
-		parametersProperties.setProperty("FRACTION_OF_ALL_ANTS_NEEDED_FOR_VICTORY", "0.75");
+		parametersProperties.setProperty("FRACTION_OF_ALL_ANTS_NEEDED_FOR_VICTORY", "0.95");
 		parametersProperties.setProperty("DONT_CHECK_VICTORY_CONDITION_BEFORE", "500");
-		parametersProperties.setProperty("MAX_TICKS_BEFORE_END", "1000");
+		parametersProperties.setProperty("MAX_TICKS_BEFORE_END", "10000");
 		
 		Parameters parameters = new Parameters(parametersProperties, 7);
 		gameWorldFactory = new GameWorldFactory(new Random().nextLong(), parameters, simulationParameters);
@@ -86,10 +86,10 @@ public class AILoadingTester {
 	 */
 	public void runGame(){
 		while(gameWorld != null){
-			while(gameWorld.getWinner().isEmpty()){
+			while(gameWorld.getWinner().isEmpty() && gameWorld.tickCount() < gameWorld.parameters.MAX_TICKS_BEFORE_END){
 				gameWorld.tick();
 			}
-			System.out.println(gameWorld.getWinner().get(0).name);
+			System.out.println(gameWorld.getWinner().get(0).name + " - tick " + gameWorld.tickCount());
 			if(gameWorld.getWinner().get(0).name.equals("AILoading"))
 				wins++;
 			else

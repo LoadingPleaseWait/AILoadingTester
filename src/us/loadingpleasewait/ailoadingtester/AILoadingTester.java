@@ -1,5 +1,6 @@
 package us.loadingpleasewait.ailoadingtester;
 
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
 
@@ -14,12 +15,41 @@ public class AILoadingTester {
 	private GameWorld gameWorld;
 	private GameWorldFactory gameWorldFactory;
 	private int wins, losses;
+	private boolean finished;
 	
 	public static void main(String[] args) {
-		AILoadingTester tester = new AILoadingTester();
-		tester.setUp();
-		tester.runGame();
-		tester.showResults();
+		ArrayList<AILoadingTester> testerList = new ArrayList<AILoadingTester>();
+		
+		// create 4 testers and run each in a thread
+		for(int i = 0; i < 4; i++){
+			AILoadingTester tester = new AILoadingTester();
+			tester.setUp();
+			testerList.add(tester);
+		}
+		for(AILoadingTester tester : testerList){
+			new Thread(() -> tester.runGame()).start();
+		}
+		
+		// wait for all tests to finish
+		boolean allTestsFinished = false;
+		while(!allTestsFinished){
+			allTestsFinished = true;
+			for(AILoadingTester tester : testerList){
+				allTestsFinished &= tester.finished;
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException ex) {
+				ex.printStackTrace();
+			}
+		}
+		
+		int totalWins = 0, totalLosses = 0;
+		for(AILoadingTester tester : testerList){
+			totalWins += tester.wins;
+			totalLosses += tester.losses;
+		}
+		System.out.println("AILoading won " + totalWins + " games and lost " + totalLosses + " out of " + (totalLosses + totalWins) + " games");
 	}
 
 	/**
@@ -32,7 +62,7 @@ public class AILoadingTester {
 		
 		settingsProperties.setProperty("IS_GRAPHICAL", "false");
 		settingsProperties.setProperty("AI_PACKAGE_NAMES", "loadingpleasewait, bonnmath, bvb, clonewarriors, dichterunddenker, pwahs03, solitary");
-		settingsProperties.setProperty("NUMBER_OF_ROUNDS", "5");
+		settingsProperties.setProperty("NUMBER_OF_ROUNDS", "2");
 		settingsProperties.setProperty("HOME_AND_AWAY", "true");
 		settingsProperties.setProperty("TOURNAMENT", "true");
 		settingsProperties.setProperty("FRAMES_PER_SECOND", "0");
@@ -96,12 +126,6 @@ public class AILoadingTester {
 				losses++;
 			createGame();// create next game
 		}
-	}
-	
-	/**
-	 * Show results of the test
-	 */
-	public void showResults(){
-		System.out.println("AILoading won " + wins + " games and lost " + losses + " out of " + (losses + wins) + " games");
+		finished = true;
 	}
 }

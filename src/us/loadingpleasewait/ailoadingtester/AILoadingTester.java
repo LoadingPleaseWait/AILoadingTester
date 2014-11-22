@@ -26,6 +26,7 @@ public class AILoadingTester {
 			tester.setUp();
 			testerList.add(tester);
 		}
+		
 		for(AILoadingTester tester : testerList){
 			new Thread(() -> tester.runGame()).start();
 		}
@@ -104,11 +105,13 @@ public class AILoadingTester {
 	 * Create the next GameWorld.
 	 */
 	public void createGame(){
+		boolean skipGame;
 		do{
 			gameWorld = gameWorldFactory.nextGameWorld();
 			if(gameWorld != null)
 				gameWorld.setLogger(new StatisticsLogger(gameWorld.getPlayers()));
-		}while(gameWorld != null && !gameWorld.getPlayers().get(0).name.equals("AILoading")); // skip games without AILoading in them
+			skipGame = gameWorld != null && !gameWorld.getPlayers().parallelStream().anyMatch(player -> player.name.equals("AILoading"));// games without an AI named AILoading
+		}while(skipGame); // skip games without AILoading in them
 	}
 	
 	/**
@@ -116,7 +119,7 @@ public class AILoadingTester {
 	 */
 	public void runGame(){
 		while(gameWorld != null){
-			while(gameWorld.getWinner().isEmpty() && gameWorld.tickCount() < gameWorld.parameters.MAX_TICKS_BEFORE_END){
+			while(gameWorld.getWinner().isEmpty()){
 				gameWorld.tick();
 			}
 			System.out.println(gameWorld.getWinner().get(0).name + " - tick " + gameWorld.tickCount());
